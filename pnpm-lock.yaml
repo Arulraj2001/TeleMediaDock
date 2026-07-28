@@ -48,11 +48,11 @@ importers:
         specifier: ^2.1.0
         version: 2.1.1
       dexie:
-        specifier: ^3.2.7
-        version: 3.2.7
+        specifier: ^4.4.4
+        version: 4.4.4
       dexie-react-hooks:
         specifier: ^1.1.7
-        version: 1.1.7(@types/react@18.3.31)(dexie@3.2.7)(react@18.3.1)
+        version: 1.1.7(@types/react@18.3.31)(dexie@4.4.4)(react@18.3.1)
       lucide-react:
         specifier: ^0.359.0
         version: 0.359.0(react@18.3.1)
@@ -1924,9 +1924,8 @@ packages:
       dexie: ^3.2 || ^4.0.1-alpha
       react: '>=16'
 
-  dexie@3.2.7:
-    resolution: {integrity: sha512-2a+BXvVhY5op+smDRLxeBAivE7YcYaneXJ1la3HOkUfX9zKkE/AJ8CNgjiXbtXepFyFmJNGSbmjOwqbT749r/w==}
-    engines: {node: '>=6.0'}
+  dexie@4.4.4:
+    resolution: {integrity: sha512-jIwsYI8Os2hgnqc6O49YwFDKGc5v5QjGx0wPVp543ip1F53VFAKMLthV2pQosQcVTv3eAskTWYspOx195PM0FQ==}
 
   didyoumean@1.2.2:
     resolution: {integrity: sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==}
@@ -5884,13 +5883,13 @@ snapshots:
   detect-libc@2.1.2:
     optional: true
 
-  dexie-react-hooks@1.1.7(@types/react@18.3.31)(dexie@3.2.7)(react@18.3.1):
+  dexie-react-hooks@1.1.7(@types/react@18.3.31)(dexie@4.4.4)(react@18.3.1):
     dependencies:
       '@types/react': 18.3.31
-      dexie: 3.2.7
+      dexie: 4.4.4
       react: 18.3.1
 
-  dexie@3.2.7: {}
+  dexie@4.4.4: {}
 
   didyoumean@1.2.2: {}
 
