@@ -24,7 +24,7 @@
     "@mediadock/typescript-config": "workspace:*",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
-    "eslint": "^8.57.0",
+    "eslint": "^10.8.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.3",
     "vitest": "^1.4.0"
