@@ -1,0 +1,51 @@
+{
+  "name": "@mediadock/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./dist/index.css": "./dist/index.css"
+  },
+
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --external react --external @mediadock/shared --external @mediadock/validation",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external react --external @mediadock/shared --external @mediadock/validation",
+    "lint": "eslint src --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {
+    "@mediadock/shared": "workspace:*",
+    "@mediadock/validation": "workspace:*",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.359.0",
+    "tailwind-merge": "^2.2.2"
+  },
+  "devDependencies": {
+    "@mediadock/eslint-config": "workspace:*",
+    "@mediadock/typescript-config": "workspace:*",
+    "@testing-library/react": "^14.2.2",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8.57.0",
+    "jsdom": "^24.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
+  }
+}

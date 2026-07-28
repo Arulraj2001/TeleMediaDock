@@ -1,0 +1,14 @@
+{
+  "extends": "@mediadock/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@mediadock/ui": ["../../packages/ui/src/index.ts"],
+      "@mediadock/shared": ["../../packages/shared/src/index.ts"],
+      "@mediadock/validation": ["../../packages/validation/src/index.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "@mediadock/typescript-config/react-library.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@mediadock/shared": ["../shared/dist/index.d.ts"],
+      "@mediadock/validation": ["../validation/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}
