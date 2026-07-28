@@ -3,6 +3,15 @@ import { DownloadManager } from '../src/services/DownloadManager';
 export default defineBackground(() => {
   const downloadManager = DownloadManager.getInstance();
 
+  // Automatically open SidePanel when user clicks extension icon in Chrome/Edge toolbar
+  chrome.sidePanel?.setPanelBehavior?.({ openPanelOnActionClick: true }).catch(() => {});
+
+  chrome.action?.onClicked?.addListener((tab) => {
+    if (tab.id && chrome.sidePanel?.open) {
+      chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
+    }
+  });
+
   // Recover pending/interrupted downloads when Service Worker boots
   chrome.runtime.onStartup.addListener(() => {
     downloadManager.recoverPendingDownloads();
@@ -11,6 +20,7 @@ export default defineBackground(() => {
   chrome.runtime.onInstalled.addListener(() => {
     downloadManager.recoverPendingDownloads();
   });
+
 
   // Handle download trigger messages from content scripts or sidepanel
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
