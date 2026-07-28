@@ -21,7 +21,7 @@
     "dexie": "^3.2.7",
     "dexie-react-hooks": "^1.1.7",
     "lucide-react": "^0.359.0",
-    "react": "^18.2.0",
+    "react": "^19.2.8",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^2.2.2",
     "zod": "^3.22.4"
@@ -30,7 +30,7 @@
     "@mediadock/eslint-config": "workspace:*",
     "@mediadock/typescript-config": "workspace:*",
     "@types/chrome": "^0.0.263",
-    "@types/react": "^18.2.66",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
