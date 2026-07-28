@@ -48,8 +48,10 @@ export default defineContentScript({
         payload: {
           chat: adapter.getCurrentChat(),
           mediaCount: discoveredMedia.length,
+          discoveredMedia,
         },
       }).catch(() => {});
+
     });
 
     // Cleanup on window unload

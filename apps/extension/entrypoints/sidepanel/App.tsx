@@ -40,7 +40,7 @@ import { Info, Download, CheckSquare, XSquare } from 'lucide-react';
 export default function App() {
   const [activeTabNav, setActiveTabNav] = useState<ExtensionTab>('media');
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'scanning'>('scanning');
-  const [chatLabel] = useState<string>('Tech Community');
+  const [chatLabel, setChatLabel] = useState<string>('Tech Community');
   const [tier, setTier] = useState<UserPlanTier>('free');
 
   // Active view state machine
@@ -49,7 +49,8 @@ export default function App() {
   >('ready');
 
   // Discovered Media state
-  const [mediaItems] = useState<MediaItemCardData[]>([
+  const [mediaItems, setMediaItems] = useState<MediaItemCardData[]>([
+
 
 
     {
@@ -141,6 +142,38 @@ export default function App() {
       });
     }
   }, []);
+
+  // Listen for discovered media from Telegram Web content script
+  useEffect(() => {
+    if (typeof chrome === 'undefined' || !chrome.runtime) return;
+
+    const messageListener = (message: any) => {
+      if (message.type === 'MEDIADOCK_MEDIA_DISCOVERED') {
+        const { chat, discoveredMedia } = message.payload || {};
+        if (chat?.label) {
+          setChatLabel(chat.label);
+        }
+        if (Array.isArray(discoveredMedia) && discoveredMedia.length > 0) {
+          const mapped: MediaItemCardData[] = discoveredMedia.map((item: any) => ({
+            id: item.id || `media_${Math.random()}`,
+            type: item.type || 'image',
+            filename: item.originalFilename || item.filename || 'telegram_media.jpg',
+            size: item.fileSize || item.size || 1048576,
+            timestamp: Date.now(),
+            srcUrl: item.srcUrl || item.directUrl,
+            isRestricted: !!item.isRestricted,
+          }));
+          setMediaItems(mapped);
+          setViewState('ready');
+          setConnectionStatus('connected');
+        }
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(messageListener);
+    return () => chrome.runtime.onMessage.removeListener(messageListener);
+  }, []);
+
 
   // Filter & Sort Calculations
   const filteredItems = useMemo(() => {
