@@ -129,19 +129,28 @@ export default function App() {
   // Inspect active tab URL on load
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        if (!activeTab || !activeTab.url) return;
+      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+        const activeTab = tabs && tabs[0];
+        if (!activeTab || !activeTab.url) {
+          setConnectionStatus('connected');
+          setViewState('ready');
+          return;
+        }
         const url = activeTab.url.toLowerCase();
-        if (!url.includes('telegram.org')) {
+        if (url.includes('telegram.org') || url.includes('telegram')) {
+          setConnectionStatus('connected');
+          setViewState('ready');
+        } else {
           setViewState('no_tab');
           setConnectionStatus('disconnected');
-        } else {
-          setConnectionStatus('connected');
         }
       });
+    } else {
+      setConnectionStatus('connected');
+      setViewState('ready');
     }
   }, []);
+
 
   // Listen for discovered media from Telegram Web content script
   useEffect(() => {
