@@ -40,14 +40,15 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
           <a
-            href="https://chrome.google.com/webstore"
+            href="https://github.com/Arulraj2001/TeleMediaDock/releases/latest"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold bg-[#4F46E5] hover:bg-[#4338CA] text-white transition-all shadow-lg hover:shadow-[#4F46E5]/25 flex items-center justify-center gap-2"
           >
             <Download className="w-4 h-4" />
-            <span>Add to Chrome</span>
+            <span>Download Free Extension</span>
           </a>
+
           <a
             href="#how-it-works"
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold bg-[#111827] hover:bg-[#172033] text-slate-200 border border-[#243047] transition-all flex items-center justify-center gap-2"
@@ -343,14 +344,15 @@ export default function HomePage() {
             Install the official MediaDock browser extension today and take complete control over your chat media assets.
           </p>
           <a
-            href="https://chrome.google.com/webstore"
+            href="https://github.com/Arulraj2001/TeleMediaDock/releases/latest"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white text-[#4F46E5] font-extrabold text-xs shadow-lg hover:bg-slate-100 transition-colors"
           >
             <Download className="w-4 h-4" />
-            <span>Install Extension Free</span>
+            <span>Download Free Extension</span>
           </a>
+
         </div>
       </section>
     </main>
