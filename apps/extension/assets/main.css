@@ -9,6 +9,7 @@ body,
   min-width: 0;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 * {
@@ -21,6 +22,11 @@ body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background-color: #F8FAFC;
   color: #0F172A;
+  touch-action: pan-y;
+}
+
+#root {
+  isolation: isolate;
 }
 
 @media (prefers-color-scheme: dark) {

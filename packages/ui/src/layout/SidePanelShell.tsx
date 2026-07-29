@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PRODUCT_NAME, type UserPlanTier } from '@mediadock/shared';
 import { FolderDown, Settings, Layers, Download, History, Sliders, Moon, Sun } from 'lucide-react';
 import { PlanBadge } from '../components/PlanBadge';
@@ -23,6 +23,11 @@ export const SidePanelShell: React.FC<SidePanelShellProps> = ({
   children,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
+  const scrollAreaRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    scrollAreaRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, [activeTab]);
 
   const navItems = [
     { id: 'media', label: 'Media', icon: <Layers className="w-4 h-4" /> },
@@ -66,7 +71,12 @@ export const SidePanelShell: React.FC<SidePanelShellProps> = ({
       </header>
 
       {/* Main View Area */}
-      <main className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
+      <main
+        ref={scrollAreaRef}
+        className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain"
+      >
+        {children}
+      </main>
 
       {/* Privacy Guarantee Bar */}
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-[9px] leading-tight text-[#64748B] dark:border-[#243047] dark:bg-[#090E1A] dark:text-[#94A3B8]">

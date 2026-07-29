@@ -515,7 +515,7 @@ export default function App() {
               <div
                 className={
                   viewMode === 'grid' || (viewMode === 'adaptive' && activeCategory === 'image')
-                    ? 'grid grid-cols-1 gap-3 min-[360px]:grid-cols-2'
+                    ? 'grid grid-cols-1 gap-3 min-[420px]:grid-cols-2'
                     : 'flex flex-col gap-2'
                 }
               >
@@ -545,7 +545,7 @@ export default function App() {
       queueCount={queueItems.length}
     >
       {activeTabNav === 'media' && (
-        <>
+        <div className="sticky top-0 z-20 min-w-0 shadow-sm">
           <MediaExplorerHeader
             chatLabel={chatLabel}
             connectionStatus={connectionStatus}
@@ -569,10 +569,12 @@ export default function App() {
             onToggleFilters={() => setShowFilters(!showFilters)}
             categoryCounts={categoryCounts}
           />
-        </>
+        </div>
       )}
 
-      <div className="min-w-0 pb-4">{renderMainContent()}</div>
+      <div className={queueItems.length > 0 ? 'min-w-0 pb-16' : 'min-w-0 pb-4'}>
+        {renderMainContent()}
+      </div>
 
       {/* Free Tier Batch Limit Modal */}
       <BatchLimitModal
@@ -603,12 +605,14 @@ export default function App() {
       />
 
       {/* Persistent Download Queue Drawer */}
-      <Drawer
-        isOpen={queueDrawerOpen}
-        onToggle={() => setQueueDrawerOpen(!queueDrawerOpen)}
-        items={queueItems}
-        onCancel={(id) => setQueueItems((current) => current.filter((item) => item.id !== id))}
-      />
+      {queueItems.length > 0 && (
+        <Drawer
+          isOpen={queueDrawerOpen}
+          onToggle={() => setQueueDrawerOpen(!queueDrawerOpen)}
+          items={queueItems}
+          onCancel={(id) => setQueueItems((current) => current.filter((item) => item.id !== id))}
+        />
+      )}
 
       {toast && (
         <div className="fixed bottom-28 left-3 right-3 z-50">
