@@ -37,14 +37,14 @@ export const SidePanelShell: React.FC<SidePanelShellProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-[520px] mx-auto bg-[#F8FAFC] dark:bg-[#090E1A] text-[#0F172A] dark:text-[#F8FAFC] overflow-hidden select-none">
+    <div className="flex h-dvh min-h-0 w-full min-w-0 max-w-[520px] flex-col overflow-hidden bg-[#F8FAFC] text-[#0F172A] dark:bg-[#090E1A] dark:text-[#F8FAFC] mx-auto select-none">
       {/* Top Bar */}
       <header className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#E2E8F0] dark:border-[#243047] bg-[#FFFFFF] dark:bg-[#111827] shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="w-7 h-7 rounded-[8px] bg-[#4F46E5] flex items-center justify-center text-white font-bold shrink-0">
             <FolderDown className="w-4 h-4" />
           </div>
-          <span className="font-bold text-sm tracking-tight">{PRODUCT_NAME}</span>
+          <span className="truncate font-bold text-sm tracking-tight">{PRODUCT_NAME}</span>
           <PlanBadge tier={tier} />
         </div>
 
@@ -66,17 +66,17 @@ export const SidePanelShell: React.FC<SidePanelShellProps> = ({
       </header>
 
       {/* Main View Area */}
-      <main className="flex-1 overflow-y-auto relative">{children}</main>
+      <main className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
 
       {/* Privacy Guarantee Bar */}
-      <div className="px-3 py-1.5 border-t border-[#E2E8F0] dark:border-[#243047] bg-[#F8FAFC] dark:bg-[#090E1A] text-[10px] text-[#64748B] dark:text-[#94A3B8] flex items-center justify-between shrink-0">
-        <span>Media downloads directly to your device and is not uploaded to MediaDock.</span>
-        <span className="font-semibold text-[#10B981] shrink-0 ml-2">100% Local</span>
+      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-[9px] leading-tight text-[#64748B] dark:border-[#243047] dark:bg-[#090E1A] dark:text-[#94A3B8]">
+        <span className="min-w-0">Downloads stay on this device.</span>
+        <span className="shrink-0 font-semibold text-[#10B981]">100% Local</span>
       </div>
 
       {/* Bottom Navigation */}
 
-      <nav className="flex items-center justify-around h-14 border-t border-[#E2E8F0] dark:border-[#243047] bg-[#FFFFFF] dark:bg-[#111827] px-2 shrink-0 z-30">
+      <nav className="z-30 grid h-14 shrink-0 grid-cols-5 items-stretch border-t border-[#E2E8F0] bg-[#FFFFFF] px-1 dark:border-[#243047] dark:bg-[#111827]">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
@@ -84,14 +84,14 @@ export const SidePanelShell: React.FC<SidePanelShellProps> = ({
               key={item.id}
               onClick={() => onTabChange(item.id as ExtensionTab)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 w-full h-full text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5]',
+                'flex h-full min-w-0 flex-col items-center justify-center gap-1 px-0.5 text-[10px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5]',
                 isActive
                   ? 'text-[#4F46E5]'
                   : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F8FAFC]'
               )}
             >
               {item.icon}
-              <span className="truncate max-w-[60px]">{item.label}</span>
+              <span className="w-full truncate text-center">{item.label}</span>
             </button>
           );
         })}

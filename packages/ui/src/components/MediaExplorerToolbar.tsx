@@ -50,15 +50,15 @@ export const MediaExplorerToolbar: React.FC<MediaExplorerToolbarProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-[#FFFFFF] dark:bg-[#111827] border-b border-[#E2E8F0] dark:border-[#243047] shrink-0 select-none">
+    <div className="flex min-w-0 flex-col gap-2.5 border-b border-[#E2E8F0] bg-[#FFFFFF] p-3 dark:border-[#243047] dark:bg-[#111827] shrink-0 select-none">
       {/* Search & Top Action Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <SearchInput
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onClear={() => onSearchChange('')}
           placeholder="Search media by filename..."
-          className="flex-1"
+          className="min-w-0 flex-1"
         />
 
         <button
@@ -91,8 +91,8 @@ export const MediaExplorerToolbar: React.FC<MediaExplorerToolbarProps> = ({
       />
 
       {/* Sort & Layout View Controls */}
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <div className="w-44">
+      <div className="flex min-w-0 items-center justify-between gap-2 pt-0.5">
+        <div className="min-w-0 flex-1 max-w-44">
           <Select
             value={sortOption}
             onChange={(e) => onSortChange(e.target.value as SortOption)}

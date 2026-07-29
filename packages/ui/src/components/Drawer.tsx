@@ -40,7 +40,7 @@ export const Drawer: React.FC<DrawerProps> = ({
   return (
     <div
       className={cn(
-        'fixed bottom-14 left-0 right-0 z-40 bg-[#FFFFFF] dark:bg-[#111827] border-t border-[#E2E8F0] dark:border-[#243047] shadow-xl transition-all duration-200 motion-reduce:transition-none',
+        'fixed bottom-[86px] left-0 right-0 z-40 mx-auto w-full max-w-[520px] overflow-hidden bg-[#FFFFFF] dark:bg-[#111827] border-t border-[#E2E8F0] dark:border-[#243047] shadow-xl transition-all duration-200 motion-reduce:transition-none',
         isOpen ? 'max-h-72' : 'max-h-11'
       )}
     >
@@ -119,11 +119,10 @@ export const Drawer: React.FC<DrawerProps> = ({
       )}
 
       {/* Mandatory UI Privacy Statement */}
-      <div className="px-4 py-2 border-t border-[#E2E8F0] dark:border-[#243047] bg-[#F8FAFC] dark:bg-[#090E1A] text-[11px] text-[#64748B] dark:text-[#94A3B8] flex items-center justify-between">
-        <span>Media downloads directly to your device and is not uploaded to MediaDock.</span>
-        <span className="font-semibold text-[#10B981]">100% Local</span>
+      <div className="flex items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-[10px] text-[#64748B] dark:border-[#243047] dark:bg-[#090E1A] dark:text-[#94A3B8]">
+        <span className="min-w-0 truncate">Downloads stay on this device.</span>
+        <span className="shrink-0 font-semibold text-[#10B981]">100% Local</span>
       </div>
     </div>
   );
 };
-
