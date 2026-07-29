@@ -44,6 +44,25 @@ cd mediadock
 pnpm install
 ```
 
+### Load the extension in Chrome or Edge
+
+The repository root and `apps/extension` source folder are not loadable extension
+artifacts. Build first, then load the generated folder:
+
+```bash
+pnpm extension:build
+```
+
+1. Open `chrome://extensions` (or `edge://extensions`).
+2. Enable **Developer mode**.
+3. Choose **Load unpacked**.
+4. Select `apps/extension/.output/chrome-mv3`.
+5. Open or reload `https://web.telegram.org/k/` or `https://web.telegram.org/a/`,
+   select a conversation, and click the MediaDock toolbar icon.
+
+After every source-code change, rebuild and click **Reload** on the extension
+card. Telegram Web must also be reloaded so the updated content script runs.
+
 ---
 
 ## 3. Workspaces & Monorepo Commands

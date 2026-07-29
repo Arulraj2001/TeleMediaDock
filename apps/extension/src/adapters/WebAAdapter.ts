@@ -59,7 +59,7 @@ export class WebAAdapter extends BaseTelegramAdapter {
 
     const mediaContainers = this.safeQueryAll<HTMLElement>(
       document,
-      '.media-container, .photo-container, .video-container',
+      '.media-container, .photo-container, .video-container, .document-container, .audio-container, .voice-message',
       'media_containers_weba'
     );
 
@@ -68,6 +68,11 @@ export class WebAAdapter extends BaseTelegramAdapter {
 
       const imgEl = el.querySelector<HTMLImageElement>('img');
       const videoEl = el.querySelector<HTMLVideoElement>('video');
+      const audioEl = el.querySelector<HTMLAudioElement>('audio');
+      const sourceLink = el.querySelector<HTMLAnchorElement>(
+        'a[download][href], a[href^="blob:"], a[href^="https:"]'
+      );
+      const fileNameEl = el.querySelector<HTMLElement>('.document-name, .file-name, .title');
 
       if (videoEl && videoEl.src) {
         results.push({
@@ -78,6 +83,16 @@ export class WebAAdapter extends BaseTelegramAdapter {
           mimeType: 'video/mp4',
           isRestricted: false,
         });
+      } else if (audioEl && (audioEl.src || audioEl.currentSrc)) {
+        results.push({
+          id: `weba_audio_${index}_${Date.now()}`,
+          type: el.matches('.voice-message') ? 'voice' : 'audio',
+          element: el,
+          srcUrl: audioEl.src || audioEl.currentSrc,
+          mimeType: audioEl.currentSrc.endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg',
+          originalFilename: fileNameEl?.textContent?.trim(),
+          isRestricted: false,
+        });
       } else if (imgEl && imgEl.src) {
         results.push({
           id: `weba_photo_${index}_${Date.now()}`,
@@ -85,6 +100,16 @@ export class WebAAdapter extends BaseTelegramAdapter {
           element: el,
           srcUrl: imgEl.src,
           mimeType: 'image/jpeg',
+          isRestricted: false,
+        });
+      } else if (fileNameEl) {
+        results.push({
+          id: `weba_doc_${index}_${Date.now()}`,
+          type: 'document',
+          element: el,
+          srcUrl: sourceLink?.href,
+          mimeType: 'application/octet-stream',
+          originalFilename: fileNameEl.textContent?.trim(),
           isRestricted: false,
         });
       }

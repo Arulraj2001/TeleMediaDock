@@ -46,7 +46,7 @@ export class WebZAdapter extends BaseTelegramAdapter {
     // 2. Scan visible chat message bubbles
     const mediaElements = this.safeQueryAll<HTMLElement>(
       document,
-      '.Media, .media-inner, .Message .media',
+      '.Media, .media-inner, .Message .media, .document-container, .audio, .Audio, .voice-message',
       'media_containers_webz'
     );
 
@@ -100,6 +100,10 @@ export class WebZAdapter extends BaseTelegramAdapter {
   private parseMediaElement(el: HTMLElement, index: number): DiscoveredMedia | null {
     const imgEl = el.querySelector<HTMLImageElement>('img');
     const videoEl = el.querySelector<HTMLVideoElement>('video');
+    const audioEl = el.querySelector<HTMLAudioElement>('audio');
+    const sourceLink = el.querySelector<HTMLAnchorElement>(
+      'a[download][href], a[href^="blob:"], a[href^="https:"]'
+    );
     const docNameEl = el.querySelector<HTMLElement>('.document-title, .file-title');
     const docSizeEl = el.querySelector<HTMLElement>('.document-size, .file-size');
     const senderEl = el.closest('.Message, .message-select')?.querySelector<HTMLElement>('.message-title, .sender-title');
@@ -129,6 +133,21 @@ export class WebZAdapter extends BaseTelegramAdapter {
       };
     }
 
+    if (audioEl && (audioEl.src || audioEl.currentSrc)) {
+      return {
+        id: `webz_audio_${index}_${Date.now()}`,
+        type: el.matches('.voice-message') ? 'voice' : 'audio',
+        element: el,
+        srcUrl: audioEl.src || audioEl.currentSrc,
+        mimeType: audioEl.currentSrc.endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg',
+        fileSize,
+        timestamp,
+        senderLabel,
+        originalFilename,
+        isRestricted: false,
+      };
+    }
+
     if (imgEl && imgEl.src) {
       const type: MediaType = imgEl.src.endsWith('.gif') ? 'gif' : 'image';
       return {
@@ -150,6 +169,7 @@ export class WebZAdapter extends BaseTelegramAdapter {
         id: `webz_doc_${index}_${Date.now()}`,
         type: 'document',
         element: el,
+        srcUrl: sourceLink?.href,
         mimeType: 'application/octet-stream',
         fileSize,
         timestamp,

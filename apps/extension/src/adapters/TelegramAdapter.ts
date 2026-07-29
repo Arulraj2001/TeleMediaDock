@@ -24,6 +24,9 @@ export interface TelegramAdapter {
   /** Retrieves metadata for a specific discovered media ID */
   getMediaMetadata(mediaId: string): DiscoveredMedia | null;
 
+  /** Stores scan results so later user-initiated downloads can resolve their IDs */
+  rememberDiscoveredMedia(media: DiscoveredMedia[]): void;
+
   /** Requests local blob download for authorized media item */
   requestAuthorizedDownload(mediaId: string): Promise<DownloadPayload>;
 

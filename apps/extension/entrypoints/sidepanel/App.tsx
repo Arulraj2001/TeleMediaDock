@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   SidePanelShell,
   MediaExplorerHeader,
@@ -11,6 +11,7 @@ import {
   HistoryExplorer,
   RetentionSettingsCard,
   Drawer,
+  Toast,
   Button,
   Card,
   NoTelegramTabState,
@@ -32,15 +33,74 @@ import {
 
 
 import { FREE_BATCH_LIMIT, type UserPlanTier } from '@mediadock/shared';
-import { batchQueueEngine } from '../../src/services/BatchQueueEngine';
 import { HistoryManager, type RetentionPolicy } from '../../src/services/HistoryManager';
 import { Info, Download, CheckSquare, XSquare } from 'lucide-react';
 
+interface TelegramResponse {
+  success: boolean;
+  error?: string;
+  chat?: { label?: string } | null;
+  discoveredMedia?: Array<{
+    id?: string;
+    type?: MediaItemCardData['type'];
+    originalFilename?: string;
+    filename?: string;
+    fileSize?: number;
+    size?: number;
+    timestamp?: string | number;
+    srcUrl?: string;
+    directUrl?: string;
+    senderLabel?: string;
+    isRestricted?: boolean;
+  }>;
+}
+
+function mapDiscoveredMedia(discoveredMedia: TelegramResponse['discoveredMedia']): MediaItemCardData[] {
+  if (!Array.isArray(discoveredMedia)) return [];
+
+  return discoveredMedia.map((item, index) => ({
+    id: item.id || `media_${index}`,
+    type: item.type || 'document',
+    filename: item.originalFilename || item.filename || `telegram_media_${index + 1}`,
+    size: item.fileSize || item.size,
+    timestamp: item.timestamp || Date.now(),
+    srcUrl: item.srcUrl || item.directUrl,
+    senderLabel: item.senderLabel,
+    isRestricted: !!item.isRestricted,
+  }));
+}
+
+async function getActiveTelegramTab(): Promise<chrome.tabs.Tab> {
+  const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const tab = tabs[0];
+  if (!tab?.id || !tab.url?.toLowerCase().includes('telegram.org')) {
+    throw new Error('Open a Telegram Web tab and select a conversation first.');
+  }
+  return tab;
+}
+
+async function sendToTelegram(message: unknown): Promise<TelegramResponse> {
+  const tab = await getActiveTelegramTab();
+
+  return new Promise((resolve, reject) => {
+    chrome.tabs.sendMessage(tab.id!, message, (response: TelegramResponse | undefined) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error('Reload Telegram Web once so MediaDock can connect to the page.'));
+        return;
+      }
+      if (!response) {
+        reject(new Error('Telegram Web did not respond. Reload the tab and try again.'));
+        return;
+      }
+      resolve(response);
+    });
+  });
+}
 
 export default function App() {
   const [activeTabNav, setActiveTabNav] = useState<ExtensionTab>('media');
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'scanning'>('scanning');
-  const [chatLabel, setChatLabel] = useState<string>('Tech Community');
+  const [chatLabel, setChatLabel] = useState<string>('No chat selected');
   const [tier, setTier] = useState<UserPlanTier>('free');
 
   // Active view state machine
@@ -49,40 +109,7 @@ export default function App() {
   >('ready');
 
   // Discovered Media state
-  const [mediaItems, setMediaItems] = useState<MediaItemCardData[]>([
-
-
-
-    {
-      id: 'demo_photo_1',
-      type: 'image',
-      filename: 'architecture_diagram_2026.png',
-      size: 1548576,
-      timestamp: Date.now() - 3600000,
-      srcUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 'demo_video_1',
-      type: 'video',
-      filename: 'demo_walkthrough.mp4',
-      size: 14500000,
-      timestamp: Date.now() - 7200000,
-    },
-    {
-      id: 'demo_doc_1',
-      type: 'document',
-      filename: 'product_requirements.pdf',
-      size: 345000,
-      timestamp: Date.now() - 86400000,
-    },
-    {
-      id: 'demo_audio_1',
-      type: 'audio',
-      filename: 'voice_note_update.ogg',
-      size: 890000,
-      timestamp: Date.now() - 172800000,
-    },
-  ]);
+  const [mediaItems, setMediaItems] = useState<MediaItemCardData[]>([]);
 
   // Toolbar & Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -106,50 +133,29 @@ export default function App() {
   // Download Queue state
   const [queueDrawerOpen, setQueueDrawerOpen] = useState(false);
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
+  const [toast, setToast] = useState<{ id: string; message: string; variant: 'success' | 'error' | 'info' } | null>(null);
 
-
-  // Subscribe to BatchQueueEngine
-  useEffect(() => {
-    const unsubscribe = batchQueueEngine.subscribe((jobs) => {
-      const mapped: QueueItem[] = jobs.map((job) => ({
-        id: job.id,
-        fileName: job.filename,
-        fileSize: job.size ? `${(job.size / 1024 / 1024).toFixed(1)} MB` : '1.5 MB',
-        progress: job.progress,
-        status: job.status === 'cancelled' ? 'failed' : (job.status as 'queued' | 'downloading' | 'completed' | 'failed' | 'paused'),
-
-
-        error: job.error,
-      }));
-      setQueueItems(mapped);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Inspect active tab URL on load
-  useEffect(() => {
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-        const activeTab = tabs && tabs[0];
-        if (!activeTab || !activeTab.url) {
-          setConnectionStatus('connected');
-          setViewState('ready');
-          return;
-        }
-        const url = activeTab.url.toLowerCase();
-        if (url.includes('telegram.org') || url.includes('telegram')) {
-          setConnectionStatus('connected');
-          setViewState('ready');
-        } else {
-          setViewState('no_tab');
-          setConnectionStatus('disconnected');
-        }
-      });
-    } else {
+  const scanTelegram = useCallback(async () => {
+    setConnectionStatus('scanning');
+    setViewState('loading');
+    try {
+      const response = await sendToTelegram({ type: 'MEDIADOCK_REQUEST_SCAN' });
+      const items = mapDiscoveredMedia(response.discoveredMedia);
+      setMediaItems(items);
+      setChatLabel(response.chat?.label || 'No chat selected');
       setConnectionStatus('connected');
-      setViewState('ready');
+      setViewState(response.chat ? (items.length > 0 ? 'ready' : 'empty') : 'no_chat');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to connect to Telegram Web.';
+      setConnectionStatus('disconnected');
+      setViewState(message.includes('Open a Telegram') ? 'no_tab' : 'empty');
+      setToast({ id: `scan_${Date.now()}`, message, variant: 'error' });
     }
   }, []);
+
+  useEffect(() => {
+    void scanTelegram();
+  }, [scanTelegram]);
 
 
   // Listen for discovered media from Telegram Web content script
@@ -162,20 +168,10 @@ export default function App() {
         if (chat?.label) {
           setChatLabel(chat.label);
         }
-        if (Array.isArray(discoveredMedia) && discoveredMedia.length > 0) {
-          const mapped: MediaItemCardData[] = discoveredMedia.map((item: any) => ({
-            id: item.id || `media_${Math.random()}`,
-            type: item.type || 'image',
-            filename: item.originalFilename || item.filename || 'telegram_media.jpg',
-            size: item.fileSize || item.size || 1048576,
-            timestamp: Date.now(),
-            srcUrl: item.srcUrl || item.directUrl,
-            isRestricted: !!item.isRestricted,
-          }));
-          setMediaItems(mapped);
-          setViewState('ready');
-          setConnectionStatus('connected');
-        }
+        const mapped = mapDiscoveredMedia(discoveredMedia);
+        setMediaItems(mapped);
+        setViewState(chat ? (mapped.length > 0 ? 'ready' : 'empty') : 'no_chat');
+        setConnectionStatus('connected');
       }
     };
 
@@ -244,20 +240,40 @@ export default function App() {
     }
   };
 
-  const handleDownloadItem = (item: MediaItemCardData) => {
-    batchQueueEngine.enqueueBatch(
-      [
-        {
-          id: item.id,
-          mediaId: item.id,
-          filename: item.filename,
-          size: item.size,
-          blobUrl: item.srcUrl || 'https://web.telegram.org/demo.jpg',
-        },
-      ],
-      tier
-    );
+  const handleDownloadItem = async (item: MediaItemCardData) => {
+    const queueId = `download_${item.id}_${Date.now()}`;
+    const fileSize = item.size ? `${(item.size / 1024 / 1024).toFixed(1)} MB` : 'Unknown size';
+    setQueueItems((current) => [
+      ...current,
+      { id: queueId, fileName: item.filename, fileSize, progress: 10, status: 'downloading' },
+    ]);
     setQueueDrawerOpen(true);
+
+    try {
+      const response = await sendToTelegram({
+        type: 'MEDIADOCK_DOWNLOAD_MEDIA',
+        mediaId: item.id,
+      });
+      if (!response.success) throw new Error(response.error || 'Download failed.');
+      setQueueItems((current) =>
+        current.map((entry) =>
+          entry.id === queueId ? { ...entry, progress: 100, status: 'completed' } : entry
+        )
+      );
+      setToast({
+        id: `download_${Date.now()}`,
+        message: `${item.filename} was sent to your Downloads folder.`,
+        variant: 'success',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Download failed.';
+      setQueueItems((current) =>
+        current.map((entry) =>
+          entry.id === queueId ? { ...entry, progress: 0, status: 'failed', error: message } : entry
+        )
+      );
+      setToast({ id: `download_error_${Date.now()}`, message, variant: 'error' });
+    }
   };
 
   const handleBatchDownloadTrigger = () => {
@@ -276,18 +292,14 @@ export default function App() {
   };
 
   const executeBatch = (items: MediaItemCardData[]) => {
-    const inputs = items.map((item) => ({
-      id: item.id,
-      mediaId: item.id,
-      filename: item.filename,
-      size: item.size,
-      blobUrl: item.srcUrl || 'https://web.telegram.org/demo.jpg',
-    }));
-
-    batchQueueEngine.enqueueBatch(inputs, tier);
     setIsMultiSelect(false);
     setSelectedIds(new Set());
     setQueueDrawerOpen(true);
+    void (async () => {
+      for (const item of items) {
+        await handleDownloadItem(item);
+      }
+    })();
   };
 
   // History & Retention state
@@ -383,7 +395,7 @@ export default function App() {
       case 'update_required':
         return <UpdateRequiredState />;
       case 'empty':
-        return <EmptyMediaState onRefresh={() => setViewState('ready')} />;
+        return <EmptyMediaState onRefresh={() => void scanTelegram()} />;
       case 'ready':
       default:
         return (
@@ -489,7 +501,7 @@ export default function App() {
         onViewModeChange={setViewMode}
         isMultiSelect={isMultiSelect}
         onToggleMultiSelect={() => setIsMultiSelect(!isMultiSelect)}
-        onRefresh={() => setConnectionStatus('scanning')}
+        onRefresh={() => void scanTelegram()}
         onToggleFilters={() => setShowFilters(!showFilters)}
         categoryCounts={categoryCounts}
       />
@@ -529,8 +541,19 @@ export default function App() {
         isOpen={queueDrawerOpen}
         onToggle={() => setQueueDrawerOpen(!queueDrawerOpen)}
         items={queueItems}
-        onCancel={(id) => batchQueueEngine.cancelItem(id)}
+        onCancel={(id) => setQueueItems((current) => current.filter((item) => item.id !== id))}
       />
+
+      {toast && (
+        <div className="fixed bottom-28 left-3 right-3 z-50">
+          <Toast
+            id={toast.id}
+            message={toast.message}
+            variant={toast.variant}
+            onDismiss={() => setToast(null)}
+          />
+        </div>
+      )}
     </SidePanelShell>
   );
 }

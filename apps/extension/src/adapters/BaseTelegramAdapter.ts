@@ -123,6 +123,10 @@ export abstract class BaseTelegramAdapter implements TelegramAdapter {
     return this.discoveredMap.get(mediaId) || null;
   }
 
+  public rememberDiscoveredMedia(media: DiscoveredMedia[]): void {
+    media.forEach((item) => this.discoveredMap.set(item.id, item));
+  }
+
   protected safeQuery<T extends Element>(
     parent: ParentNode,
     selector: string,
